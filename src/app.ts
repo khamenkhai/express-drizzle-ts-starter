@@ -41,6 +41,7 @@ export const createApp = (): Application => {
     standardHeaders: true,
     legacyHeaders: false,
   });
+  
   app.use(`/api/${config.apiVersion}`, limiter);
 
   // Body parsing middleware
