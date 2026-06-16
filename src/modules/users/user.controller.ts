@@ -85,11 +85,11 @@ export class UserController {
 
       const { id } = req.params;
       const userId = Number(id);
-      const { role }: UpdateUserRoleInput = req.body;
+      const { roleId }: UpdateUserRoleInput = req.body;
 
-      const user = await userService.updateUserRole(userId, role, req.user.id);
+      const user = await userService.updateUserRole(userId, roleId, req.user.id);
 
-      logger.info(`User role updated: ${user.email} -> ${role}`);
+      logger.info(`User role updated: ${user.email} -> ${roleId}`);
 
       res.status(200).json({
         success: true,

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { UserRole } from "../../shared/types";
 
 export const updateUserSchema = z.object({
   body: z.object({
@@ -10,7 +9,7 @@ export const updateUserSchema = z.object({
 
 export const updateUserRoleSchema = z.object({
   body: z.object({
-    role: z.nativeEnum(UserRole),
+    roleId: z.string().uuid("Invalid role ID format"),
   }),
   params: z.object({
     id: z.coerce.number({

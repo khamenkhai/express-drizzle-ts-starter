@@ -1,92 +1,97 @@
-import { db } from "../../db"; // Ensure this points to your Drizzle instance
-import { usersTable, User, NewUser } from "../../db/schema";
-import { eq } from "drizzle-orm";
-import { UserRole } from "../../shared/types";
-import {
-  ForbiddenError,
-  NotFoundError,
-  ConflictError,
-} from "../../shared/types/error";
-import { UpdateUserInput } from "./user.validation";
+import { prisma } from "../../db";
+import { NotFoundError, ForbiddenError } from "../../shared/types/error";
 
 export class UserService {
-  private omitPassword(user: User): Omit<User, "password"> {
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+  async getAllUsers() {
+    const users = await prisma.user.findMany({
+      include: { role: true },
+    });
+    return users.map(({ password, ...user }) => user);
   }
 
-  async getAllUsers(): Promise<Omit<User, "password">[]> {
-    const users = await db.select().from(usersTable);
-    return users.map(this.omitPassword);
-  }
-
-  async getUserById(id: number): Promise<Omit<User, "password">> {
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, id));
+  async getUserById(id: number) {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: { role: true },
+    });
 
     if (!user) {
       throw new NotFoundError("User not found");
     }
 
-    return this.omitPassword(user);
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
-  async getUserByEmail(email: string): Promise<User | null> {
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, email));
-
-    return user || null;
+  async getUserByEmail(email: string) {
+    return prisma.user.findUnique({
+      where: { email },
+      include: { role: true },
+    });
   }
 
-  async createUser(data: NewUser): Promise<Omit<User, "password">> {
-    const [result] = await db.insert(usersTable).values(data);
+  async createUser(data: {
+    name: string;
+    email: string;
+    password: string;
+    age: number;
+    roleId?: string | null;
+  }) {
+    const user = await prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        age: data.age,
+        roleId: data.roleId,
+      },
+      include: { role: true },
+    });
 
-    // Fetch newly created user using the insertId
-    const newUser = await this.getUserById(result.insertId);
-    return newUser;
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   async updateUser(
     id: number,
-    data: UpdateUserInput,
-  ): Promise<Omit<User, "password">> {
-    // Check if user exists
-    const [existing] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, id));
+    data: { name?: string; email?: string },
+  ) {
+    const existing = await prisma.user.findUnique({ where: { id } });
     if (!existing) throw new NotFoundError("User not found");
 
-    await db.update(usersTable).set(data).where(eq(usersTable.id, id));
+    const user = await prisma.user.update({
+      where: { id },
+      data,
+      include: { role: true },
+    });
 
-    return await this.getUserById(id);
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   async updateUserRole(
     id: number,
-    role: UserRole,
+    roleId: string,
     requestingUserId: number,
-  ): Promise<Omit<User, "password">> {
+  ) {
     if (id === requestingUserId) {
       throw new ForbiddenError("You cannot change your own role");
     }
 
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, id));
-    if (!user) throw new NotFoundError("User not found");
+    const existing = await prisma.user.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundError("User not found");
 
-    await db
-      .update(usersTable)
-      .set({ role: role as string }) // Casting role if needed for Drizzle varchar
-      .where(eq(usersTable.id, id));
+    const role = await prisma.role.findUnique({ where: { id: roleId } });
+    if (!role) throw new NotFoundError("Role not found");
 
-    return await this.getUserById(id);
+    const user = await prisma.user.update({
+      where: { id },
+      data: { roleId },
+      include: { role: true },
+    });
+
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   async deleteUser(id: number, requestingUserId: number): Promise<void> {
@@ -94,11 +99,13 @@ export class UserService {
       throw new ForbiddenError("You cannot delete your own account");
     }
 
-    const [result] = await db.delete(usersTable).where(eq(usersTable.id, id));
-
-    // In MySQL, result.affectedRows tells us if something was actually deleted
-    if (result.affectedRows === 0) {
-      throw new NotFoundError("User not found");
+    try {
+      await prisma.user.delete({ where: { id } });
+    } catch (error: any) {
+      if (error.code === "P2025") {
+        throw new NotFoundError("User not found");
+      }
+      throw error;
     }
   }
 }

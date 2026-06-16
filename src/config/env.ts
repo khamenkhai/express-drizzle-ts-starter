@@ -5,7 +5,7 @@ dotenv.config();
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.string().transform(Number).default('4000'),
+  PORT: z.string().transform(Number).default('5001'),
   API_VERSION: z.string().default('v1'),
   
   DATABASE_URL: z.string().optional(),
@@ -15,7 +15,7 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
   
-  ALLOWED_ORIGINS: z.string().default('http://localhost:4000'),
+  ALLOWED_ORIGINS: z.string().default('http://localhost:5001'),
   
   RATE_LIMIT_WINDOW_MS: z.string().transform(Number).default('900000'),
   RATE_LIMIT_MAX_REQUESTS: z.string().transform(Number).default('100'),

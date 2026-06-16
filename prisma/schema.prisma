@@ -1,0 +1,62 @@
+generator client {
+  provider     = "prisma-client"
+  moduleFormat = "cjs"
+  output       = "../src/db/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  name     String  @db.VarChar(255)
+  password String  @db.VarChar(255)
+  age      Int
+  email    String  @unique @db.VarChar(255)
+  role     Role?   @relation(fields: [roleId], references: [id])
+  roleId   String? @map("role_id")
+
+  @@index([roleId])
+  @@map("users_table")
+}
+
+model Permission {
+  id             String           @id @default(uuid())
+  permissionName String           @unique @map("permission_name")
+  description    String?
+  roles          RolePermission[]
+
+  @@map("permissions")
+}
+
+model Role {
+  id              String           @id @default(uuid())
+  name            String           @unique
+  rolePermissions RolePermission[]
+  users           User[]
+
+  @@map("roles")
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permission")
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(255)
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("posts_table")
+}

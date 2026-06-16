@@ -3,7 +3,6 @@ import { userController } from "./user.controller";
 import { authenticate } from "../../shared/middleware/auth.middleware";
 import { authorize } from "../../shared/middleware/authorize.middleware";
 import { validate } from "../../shared/middleware/validate.middleware";
-import { UserRole } from "../../shared/types";
 import {
   updateUserSchema,
   updateUserRoleSchema,
@@ -20,7 +19,7 @@ userRoutes.use(authenticate);
  * @desc    Get all users
  * @access  Private (Admin only)
  */
-userRoutes.get("/", authorize(UserRole.ADMIN), userController.getAllUsers);
+userRoutes.get("/", authorize("superadmin", "admin"), userController.getAllUsers);
 
 /**
  * @route   GET /api/v1/users/:id
@@ -29,7 +28,7 @@ userRoutes.get("/", authorize(UserRole.ADMIN), userController.getAllUsers);
  */
 userRoutes.get(
   "/:id",
-  authorize(UserRole.ADMIN),
+  authorize("superadmin", "admin"),
   validate(getUserByIdSchema),
   userController.getUserById,
 );
@@ -48,7 +47,7 @@ userRoutes.patch("/me", authenticate,userController.updateUser);
  */
 userRoutes.patch(
   "/:id/role",
-  authorize(UserRole.ADMIN),
+  authorize("superadmin", "admin"),
   validate(updateUserRoleSchema),
   userController.updateUserRole,
 );
@@ -60,7 +59,7 @@ userRoutes.patch(
  */
 userRoutes.delete(
   "/:id",
-  authorize(UserRole.ADMIN),
+  authorize("superadmin", "admin"),
   validate(getUserByIdSchema),
   userController.deleteUser,
 );

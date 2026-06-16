@@ -1,16 +1,9 @@
 import { Request } from 'express';
 
-export enum UserRole {
-  USER = 'USER',
-  ADMIN = 'ADMIN',
-  MODERATOR = 'MODERATOR',
-}
-
-
 export interface IUserPayload {
   id: number;
   email: string;
-  role: UserRole;
+  role: string;
 }
 
 export interface AuthRequest extends Request {

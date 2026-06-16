@@ -2,18 +2,17 @@ version: "3.8"
 
 services:
   db:
-    image: mysql:8.0
-    container_name: express-drizzle-mysql
+    image: postgres:16
+    container_name: express-prisma-postgres
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: express_drizzle
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: express_prisma
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  mysql_data:
+  postgres_data:
