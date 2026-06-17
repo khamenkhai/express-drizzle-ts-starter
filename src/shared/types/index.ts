@@ -4,6 +4,7 @@ export interface IUserPayload {
   id: number;
   email: string;
   role: string;
+  permissions: string[];
 }
 
 export interface AuthRequest extends Request {

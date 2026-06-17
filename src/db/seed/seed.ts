@@ -1,5 +1,8 @@
-import { prisma } from "./db";
-import { hashPassword } from "./shared/utils/password.utils";
+import { prisma } from "..";
+import { hashPassword } from "../../shared/utils/password.utils";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const permissionsData = [
   { permissionName: "user:read", description: "View users" },
@@ -38,14 +41,18 @@ async function seed() {
     create: { name: "superadmin" },
   });
 
-  await prisma.rolePermission.deleteMany({ where: { roleId: superadminRole.id } });
+  await prisma.rolePermission.deleteMany({
+    where: { roleId: superadminRole.id },
+  });
   await prisma.rolePermission.createMany({
     data: allPermissionIds.map((permissionId) => ({
       roleId: superadminRole.id,
       permissionId,
     })),
   });
-  console.log(`Assigned all ${allPermissionIds.length} permissions to superadmin role`);
+  console.log(
+    `Assigned all ${allPermissionIds.length} permissions to superadmin role`,
+  );
 
   const adminRole = await prisma.role.upsert({
     where: { name: "admin" },
@@ -53,7 +60,13 @@ async function seed() {
     create: { name: "admin" },
   });
 
-  const adminPermissionNames = ["user:read", "user:create", "user:update", "role:read", "permission:read"];
+  const adminPermissionNames = [
+    "user:read",
+    "user:create",
+    "user:update",
+    "role:read",
+    "permission:read",
+  ];
   const adminPermissionIds = createdPermissions
     .filter((p) => adminPermissionNames.includes(p.permissionName))
     .map((p) => p.id);
@@ -67,7 +80,9 @@ async function seed() {
       })),
     });
   }
-  console.log(`Assigned ${adminPermissionIds.length} permissions to admin role`);
+  console.log(
+    `Assigned ${adminPermissionIds.length} permissions to admin role`,
+  );
 
   const userRole = await prisma.role.upsert({
     where: { name: "user" },
@@ -92,7 +107,9 @@ async function seed() {
   console.log(`Assigned ${userPermissionIds.length} permissions to user role`);
 
   const superadminEmail = "superadmin@example.com";
-  const existingSuperadmin = await prisma.user.findUnique({ where: { email: superadminEmail } });
+  const existingSuperadmin = await prisma.user.findUnique({
+    where: { email: superadminEmail },
+  });
 
   if (!existingSuperadmin) {
     const hashedPassword = await hashPassword("SuperAdmin123!");
@@ -105,7 +122,9 @@ async function seed() {
         roleId: superadminRole.id,
       },
     });
-    console.log("Superadmin user created: superadmin@example.com / SuperAdmin123!");
+    console.log(
+      "Superadmin user created: superadmin@example.com / SuperAdmin123!",
+    );
   } else {
     console.log("Superadmin user already exists");
   }

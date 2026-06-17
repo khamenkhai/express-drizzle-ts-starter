@@ -12,7 +12,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:generate": "prisma generate",
-    "seed": "tsx src/seed.ts"
+    "seed": "tsx src/db/seed/seed.ts"
   },
   "author": "",
   "license": "ISC",

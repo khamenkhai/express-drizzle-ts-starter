@@ -108,6 +108,27 @@ export class UserService {
       throw error;
     }
   }
+
+  async getUserPermissions(userId: number): Promise<string[]> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        role: {
+          include: {
+            rolePermissions: {
+              include: { permission: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user?.role) return [];
+
+    return user.role.rolePermissions.map(
+      (rp) => rp.permission.permissionName,
+    );
+  }
 }
 
 export const userService = new UserService();

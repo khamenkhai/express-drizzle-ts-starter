@@ -27,10 +27,13 @@ export class AuthService {
       age: 20,
     });
 
+    const permissions = await userService.getUserPermissions(user.id);
+
     const tokens = generateTokenPair({
       id: user.id,
       email: user.email,
-      role: user.role?.name ?? "",
+      role: user.role?.id ?? "",
+      permissions,
     });
 
     return { user, tokens };
@@ -47,10 +50,13 @@ export class AuthService {
       throw new UnauthorizedError("Invalid credentials");
     }
 
+    const permissions = await userService.getUserPermissions(user.id);
+
     const tokens = generateTokenPair({
       id: user.id,
       email: user.email,
-      role: user.role?.name ?? "",
+      role: user.role?.id ?? "",
+      permissions,
     });
 
     const { password, ...userWithoutPassword } = user;
@@ -61,10 +67,13 @@ export class AuthService {
   async refreshToken(refreshToken: string): Promise<TokenPair> {
     const payload = verifyRefreshToken(refreshToken);
 
+    const permissions = await userService.getUserPermissions(payload.id);
+
     return generateTokenPair({
       id: payload.id,
       email: payload.email,
       role: payload.role,
+      permissions,
     });
   }
 

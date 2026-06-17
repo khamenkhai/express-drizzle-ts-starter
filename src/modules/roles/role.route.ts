@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { roleController } from "./role.controller";
 import { authenticate } from "../../shared/middleware/auth.middleware";
-import { authorize } from "../../shared/middleware/authorize.middleware";
+import { requirePermissions } from "../../shared/middleware/permissions.middleware";
 import { validate } from "../../shared/middleware/validate.middleware";
 import {
   createRoleSchema,
@@ -13,32 +13,36 @@ const roleRoutes = Router();
 
 roleRoutes.use(authenticate);
 
-roleRoutes.get("/", authorize("superadmin", "admin"), roleController.getAll);
+roleRoutes.get(
+  "/",
+  requirePermissions("role:read"),
+  roleController.getAll,
+);
 
 roleRoutes.get(
   "/:id",
-  authorize("superadmin", "admin"),
+  requirePermissions("role:read"),
   validate(getRoleByIdSchema),
   roleController.getById,
 );
 
 roleRoutes.post(
   "/",
-  authorize("superadmin"),
+  requirePermissions("role:create"),
   validate(createRoleSchema),
   roleController.create,
 );
 
 roleRoutes.patch(
   "/:id",
-  authorize("superadmin"),
+  requirePermissions("role:update"),
   validate(updateRoleSchema),
   roleController.update,
 );
 
 roleRoutes.delete(
   "/:id",
-  authorize("superadmin"),
+  requirePermissions("role:delete"),
   validate(getRoleByIdSchema),
   roleController.delete,
 );

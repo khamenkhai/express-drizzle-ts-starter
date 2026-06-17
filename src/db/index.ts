@@ -1,6 +1,7 @@
-import { PrismaPg } from "@prisma/adapter-pg";
+import "dotenv/config";
 import { PrismaClient } from "./generated/client/client";
-// Initialize the adapter according to your driver's requirements
+import { PrismaPg } from "@prisma/adapter-pg";
+
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-// Pass the adapter instance to PrismaClient
+
 export const prisma = new PrismaClient({ adapter });

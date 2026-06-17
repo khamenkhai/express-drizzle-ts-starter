@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { permissionController } from "./permission.controller";
 import { authenticate } from "../../shared/middleware/auth.middleware";
-import { authorize } from "../../shared/middleware/authorize.middleware";
+import { requirePermissions } from "../../shared/middleware/permissions.middleware";
 import { validate } from "../../shared/middleware/validate.middleware";
 import {
   createPermissionSchema,
@@ -13,32 +13,36 @@ const permissionRoutes = Router();
 
 permissionRoutes.use(authenticate);
 
-permissionRoutes.get("/", authorize("superadmin", "admin"), permissionController.getAll);
+permissionRoutes.get(
+  "/",
+  requirePermissions("permission:read"),
+  permissionController.getAll,
+);
 
 permissionRoutes.get(
   "/:id",
-  authorize("superadmin", "admin"),
+  requirePermissions("permission:read"),
   validate(getPermissionByIdSchema),
   permissionController.getById,
 );
 
 permissionRoutes.post(
   "/",
-  authorize("superadmin"),
+  requirePermissions("permission:create"),
   validate(createPermissionSchema),
   permissionController.create,
 );
 
 permissionRoutes.patch(
   "/:id",
-  authorize("superadmin"),
+  requirePermissions("permission:update"),
   validate(updatePermissionSchema),
   permissionController.update,
 );
 
 permissionRoutes.delete(
   "/:id",
-  authorize("superadmin"),
+  requirePermissions("permission:delete"),
   validate(getPermissionByIdSchema),
   permissionController.delete,
 );
