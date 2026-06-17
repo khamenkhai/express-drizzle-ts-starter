@@ -1,18 +1,19 @@
 import jwt from 'jsonwebtoken';
+
 import { config } from '../../config/env';
-import { IUserPayload, TokenPair } from '../types';
+import { type IUserPayload, type TokenPair } from '../types';
 import { UnauthorizedError } from '../types/error';
 
 export const generateAccessToken = (payload: IUserPayload): string => {
   return jwt.sign(payload, config.jwt.secret, {
-    expiresIn: config.jwt.expiresIn as any ,//^^^^
-  });
+    expiresIn: config.jwt.expiresIn,
+  } as jwt.SignOptions);
 };
 
 export const generateRefreshToken = (payload: IUserPayload): string => {
   return jwt.sign(payload, config.jwt.refreshSecret, {
-    expiresIn: config.jwt.refreshExpiresIn as any,//^^^^
-  });
+    expiresIn: config.jwt.refreshExpiresIn,
+  } as jwt.SignOptions);
 };
 
 export const generateTokenPair = (payload: IUserPayload): TokenPair => {
@@ -25,7 +26,7 @@ export const generateTokenPair = (payload: IUserPayload): TokenPair => {
 export const verifyAccessToken = (token: string): IUserPayload => {
   try {
     return jwt.verify(token, config.jwt.secret) as IUserPayload;
-  } catch (error) {
+  } catch (_error) {
     throw new UnauthorizedError('Invalid or expired access token');
   }
 };
@@ -33,7 +34,7 @@ export const verifyAccessToken = (token: string): IUserPayload => {
 export const verifyRefreshToken = (token: string): IUserPayload => {
   try {
     return jwt.verify(token, config.jwt.refreshSecret) as IUserPayload;
-  } catch (error) {
+  } catch (_error) {
     throw new UnauthorizedError('Invalid or expired refresh token');
   }
 };
@@ -41,7 +42,7 @@ export const verifyRefreshToken = (token: string): IUserPayload => {
 export const decodeToken = (token: string): IUserPayload | null => {
   try {
     return jwt.decode(token) as IUserPayload;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 };

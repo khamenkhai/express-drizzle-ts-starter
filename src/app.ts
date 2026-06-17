@@ -1,15 +1,15 @@
-import express, { Application } from "express";
-import helmet from "helmet";
 import cors from "cors";
+import express, { type Application } from "express";
 import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 import { config } from "./config/env";
-import { requestLogger } from "./shared/middleware/logger.middleware";
+import router from "./routes";
 import {
   errorHandler,
   notFoundHandler,
 } from "./shared/middleware/error.middleware";
-import router from "./routes";
+import { requestLogger } from "./shared/middleware/logger.middleware";
 
 export const createApp = (): Application => {
   const app = express();
@@ -48,7 +48,6 @@ export const createApp = (): Application => {
   // Body parsing middleware
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-  //   app.use(cookieParser());
 
   // Request logging
   app.use(requestLogger);
@@ -68,6 +67,7 @@ export const createApp = (): Application => {
         users: `/api/${config.apiVersion}/users`,
         roles: `/api/${config.apiVersion}/roles`,
         permissions: `/api/${config.apiVersion}/permissions`,
+        posts: `/api/${config.apiVersion}/posts`,
       },
     });
   });

@@ -6,7 +6,7 @@ export class UserService {
     const users = await prisma.user.findMany({
       include: { role: true },
     });
-    return users.map(({ password, ...user }) => user);
+    return users.map(({ password: _password, ...user }) => user);
   }
 
   async getUserById(id: number) {
@@ -19,7 +19,7 @@ export class UserService {
       throw new NotFoundError("User not found");
     }
 
-    const { password, ...userWithoutPassword } = user;
+    const { password: _password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
@@ -48,7 +48,7 @@ export class UserService {
       include: { role: true },
     });
 
-    const { password, ...userWithoutPassword } = user;
+    const { password: _password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
@@ -65,7 +65,7 @@ export class UserService {
       include: { role: true },
     });
 
-    const { password, ...userWithoutPassword } = user;
+    const { password: _password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
@@ -90,7 +90,7 @@ export class UserService {
       include: { role: true },
     });
 
-    const { password, ...userWithoutPassword } = user;
+    const { password: _password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
@@ -101,8 +101,13 @@ export class UserService {
 
     try {
       await prisma.user.delete({ where: { id } });
-    } catch (error: any) {
-      if (error.code === "P2025") {
+    } catch (error: unknown) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        (error as { code: string }).code === "P2025"
+      ) {
         throw new NotFoundError("User not found");
       }
       throw error;

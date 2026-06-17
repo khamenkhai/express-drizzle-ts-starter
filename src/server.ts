@@ -2,7 +2,7 @@ import { createApp } from "./app";
 import { config } from "./config/env";
 import { logger } from "./shared/utils/logger";
 
-const startServer = async () => {
+const startServer = () => {
   try {
     const app = createApp();
 
@@ -54,4 +54,4 @@ const startServer = async () => {
   }
 };
 
-startServer();
+void startServer();

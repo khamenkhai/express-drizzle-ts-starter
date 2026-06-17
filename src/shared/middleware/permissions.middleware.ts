@@ -1,5 +1,6 @@
-import { Response, NextFunction } from "express";
-import { AuthRequest } from "../types";
+import { type Response, type NextFunction } from "express";
+
+import { type AuthRequest } from "../types";
 import { ForbiddenError, UnauthorizedError } from "../types/error";
 
 export const requirePermissions = (...requiredPermissions: string[]) => {

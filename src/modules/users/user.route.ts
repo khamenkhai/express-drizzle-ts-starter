@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { userController } from "./user.controller";
+
 import { authenticate } from "../../shared/middleware/auth.middleware";
 import { requirePermissions } from "../../shared/middleware/permissions.middleware";
 import { validate } from "../../shared/middleware/validate.middleware";
+
+import { userController } from "./user.controller";
 import {
-  updateUserSchema,
   updateUserRoleSchema,
   getUserByIdSchema,
 } from "./user.validation";

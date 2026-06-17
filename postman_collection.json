@@ -40,6 +40,21 @@
 			"key": "userId",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "roleId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "permissionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "postId",
+			"value": "",
+			"type": "string"
 		}
 	],
 	"item": [
@@ -313,14 +328,14 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"role\": \"admin\"\n}"
+							"raw": "{\n  \"roleId\": \"<role-uuid>\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/role",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "{{apiVersion}}", "users", "{{userId}}", "role"]
 						},
-						"description": "Update a user's role (Admin only). Valid roles: 'user', 'admin'"
+						"description": "Update a user's role by role ID (Admin only). Use a valid UUID from the roles endpoint."
 					},
 					"response": []
 				},
@@ -335,6 +350,285 @@
 							"path": ["api", "{{apiVersion}}", "users", "{{userId}}"]
 						},
 						"description": "Delete a user by ID (Admin only)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Roles",
+			"item": [
+				{
+					"name": "Get All Roles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/roles",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "roles"]
+						},
+						"description": "Get all roles"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Role By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/roles/{{roleId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "roles", "{{roleId}}"]
+						},
+						"description": "Get a specific role by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Role",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"moderator\",\n  \"permissionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/roles",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "roles"]
+						},
+						"description": "Create a new role with optional permission IDs"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Role",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"moderator\",\n  \"permissionIds\": []\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/roles/{{roleId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "roles", "{{roleId}}"]
+						},
+						"description": "Update a role's name and/or permission IDs"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Role",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/roles/{{roleId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "roles", "{{roleId}}"]
+						},
+						"description": "Delete a role by ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Posts",
+			"item": [
+				{
+					"name": "Get All Posts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/posts",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "posts"]
+						},
+						"description": "Get all posts"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Post By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/posts/{{postId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "posts", "{{postId}}"]
+						},
+						"description": "Get a specific post by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"My First Post\",\n  \"content\": \"This is the content of my first post.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/posts",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "posts"]
+						},
+						"description": "Create a new post"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Post",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Title\",\n  \"content\": \"Updated content.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/posts/{{postId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "posts", "{{postId}}"]
+						},
+						"description": "Update a post's title and/or content"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Post",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/posts/{{postId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "posts", "{{postId}}"]
+						},
+						"description": "Delete a post by ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Permissions",
+			"item": [
+				{
+					"name": "Get All Permissions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/permissions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "permissions"]
+						},
+						"description": "Get all permissions"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Permission By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/permissions/{{permissionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "permissions", "{{permissionId}}"]
+						},
+						"description": "Get a specific permission by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Permission",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"permissionName\": \"post:create\",\n  \"description\": \"Ability to create posts\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/permissions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "permissions"]
+						},
+						"description": "Create a new permission"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Permission",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"permissionName\": \"post:create\",\n  \"description\": \"Ability to create posts\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/permissions/{{permissionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "permissions", "{{permissionId}}"]
+						},
+						"description": "Update a permission's name and/or description"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Permission",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/permissions/{{permissionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "permissions", "{{permissionId}}"]
+						},
+						"description": "Delete a permission by ID"
 					},
 					"response": []
 				}

@@ -1,125 +1,102 @@
-import { Response, NextFunction } from "express";
-import { userService } from "./user.service";
-import { AuthRequest } from "../../shared/types";
-import { UpdateUserInput, UpdateUserRoleInput } from "./user.validation";
+import { type Response } from "express";
+
+import { type AuthRequest } from "../../shared/types";
 import { logger } from "../../shared/utils/logger";
+import { asyncHandler } from "../../shared/utils/asyncHandler";
+
+import { userService } from "./user.service";
+import { type UpdateUserInput, type UpdateUserRoleInput } from "./user.validation";
 
 export class UserController {
-  async getAllUsers(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      const users = await userService.getAllUsers();
+  getAllUsers = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const users = await userService.getAllUsers();
 
-      res.status(200).json({
-        success: true,
-        data: users,
-      });
-    } catch (error) {
-      next(error);
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
+  });
+
+  getUserById = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+
+    const userId = Number(id);
+
+    if (isNaN(userId)) {
+      res.status(400).json({ message: "Invalid User ID format" });
+      return;
     }
-  }
 
-  async getUserById(
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction,
-  ): Promise<any> {
-    try {
-      const { id } = req.params;
+    const user = await userService.getUserById(userId);
 
-      const userId = Number(id);
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  });
 
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid User ID format" });
-      }
-
-      const user = await userService.getUserById(userId);
-
-      res.status(200).json({
-        success: true,
-        data: user,
-      });
-    } catch (error) {
-      next(error);
+  updateUser = asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      throw new Error("User not authenticated");
     }
-  }
 
-  async updateUser(
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction,
-  ): Promise<any> {
-    try {
-      if (!req.user) {
-        throw new Error("User not authenticated");
-      }
+    const userId = Number(req.user.id);
 
-      const userId = Number(req.user.id);
-
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid User ID format" });
-      }
-
-      const data: UpdateUserInput = req.body;
-
-      const user = await userService.updateUser(userId, {
-        name : data.name
-      });
-
-      logger.info(`User updated: ${user.email}`);
-
-      res.status(200).json({
-        success: true,
-        message: "User updated successfully",
-        data: user,
-      });
-    } catch (error) {
-      next(error);
+    if (isNaN(userId)) {
+      res.status(400).json({ message: "Invalid User ID format" });
+      return;
     }
-  }
 
-  async updateUserRole(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      if (!req.user) {
-        throw new Error("User not authenticated");
-      }
+    const data = req.body as UpdateUserInput;
 
-      const { id } = req.params;
-      const userId = Number(id);
-      const { roleId }: UpdateUserRoleInput = req.body;
+    const user = await userService.updateUser(userId, {
+      name: data.name,
+    });
 
-      const user = await userService.updateUserRole(userId, roleId, req.user.id);
+    logger.info(`User updated: ${user.email}`);
 
-      logger.info(`User role updated: ${user.email} -> ${roleId}`);
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: user,
+    });
+  });
 
-      res.status(200).json({
-        success: true,
-        message: "User role updated successfully",
-        data: user,
-      });
-    } catch (error) {
-      next(error);
+  updateUserRole = asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      throw new Error("User not authenticated");
     }
-  }
 
-  async deleteUser(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      if (!req.user) {
-        throw new Error("User not authenticated");
-      }
+    const { id } = req.params;
+    const userId = Number(id);
+    const { roleId } = req.body as UpdateUserRoleInput;
 
-      const { id } = req.params;
-      await userService.deleteUser(Number(id), req.user.id);
+    const user = await userService.updateUserRole(userId, roleId, req.user.id);
 
-      logger.info(`User deleted: ${id}`);
+    logger.info(`User role updated: ${user.email} -> ${roleId}`);
 
-      res.status(200).json({
-        success: true,
-        message: "User deleted successfully",
-      });
-    } catch (error) {
-      next(error);
+    res.status(200).json({
+      success: true,
+      message: "User role updated successfully",
+      data: user,
+    });
+  });
+
+  deleteUser = asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      throw new Error("User not authenticated");
     }
-  }
+
+    const { id } = req.params;
+    await userService.deleteUser(Number(id), req.user.id);
+
+    logger.info(`User deleted: ${id}`);
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  });
 }
 
 export const userController = new UserController();

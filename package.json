@@ -12,22 +12,30 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:generate": "prisma generate",
-    "seed": "tsx src/db/seed/seed.ts"
+    "seed": "tsx src/db/seed/seed.ts",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.10",
+    "eslint": "^10.5.0",
+    "eslint-plugin-import-x": "^4.16.2",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "globals": "^17.6.0",
     "prisma": "^7.8.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.61.1"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

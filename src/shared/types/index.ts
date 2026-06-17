@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { type Request } from "express";
 
 export interface IUserPayload {
   id: number;
@@ -16,6 +16,7 @@ export interface TokenPair {
   refreshToken: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
@@ -26,8 +27,9 @@ export interface ApiResponse<T = any> {
 export interface PaginationParams {
   page: number;
   limit: number;
+  search?: string;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface PaginatedResponse<T> {

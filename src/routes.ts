@@ -1,8 +1,10 @@
 import { Router } from "express";
+
 import authRoutes from "./modules/auth/auth.route";
-import userRoutes from "./modules/users/user.route";
-import roleRoutes from "./modules/roles/role.route";
 import permissionRoutes from "./modules/permissions/permission.route";
+import postRoutes from "./modules/posts/post.route";
+import roleRoutes from "./modules/roles/role.route";
+import userRoutes from "./modules/users/user.route";
 
 const router = Router();
 
@@ -20,5 +22,6 @@ router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/roles", roleRoutes);
 router.use("/permissions", permissionRoutes);
+router.use("/posts", postRoutes);
 
 export default router;

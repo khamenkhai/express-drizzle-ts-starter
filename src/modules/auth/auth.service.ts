@@ -1,4 +1,4 @@
-import { TokenPair } from "../../shared/types";
+import { type TokenPair } from "../../shared/types";
 import { ConflictError, UnauthorizedError } from "../../shared/types/error";
 import {
   generateTokenPair,
@@ -9,7 +9,8 @@ import {
   hashPassword,
 } from "../../shared/utils/password.utils";
 import { userService } from "../users/user.service";
-import { LoginInput, RegisterInput } from "./auth.validation";
+
+import { type LoginInput, type RegisterInput } from "./auth.validation";
 
 export class AuthService {
   async register(data: RegisterInput) {
@@ -59,7 +60,7 @@ export class AuthService {
       permissions,
     });
 
-    const { password, ...userWithoutPassword } = user;
+    const { password: _password, ...userWithoutPassword } = user;
 
     return { user: userWithoutPassword, tokens };
   }

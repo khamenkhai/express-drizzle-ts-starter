@@ -1,8 +1,10 @@
 import { Router } from "express";
-import { permissionController } from "./permission.controller";
+
 import { authenticate } from "../../shared/middleware/auth.middleware";
 import { requirePermissions } from "../../shared/middleware/permissions.middleware";
 import { validate } from "../../shared/middleware/validate.middleware";
+
+import { permissionController } from "./permission.controller";
 import {
   createPermissionSchema,
   updatePermissionSchema,

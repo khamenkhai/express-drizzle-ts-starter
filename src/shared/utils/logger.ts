@@ -1,4 +1,5 @@
 import winston from 'winston';
+
 import { config } from '../../config/env';
 
 const levels = {
@@ -28,7 +29,7 @@ const format = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.colorize({ all: true }),
   winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`
+    (info: winston.Logform.TransformableInfo) => `${String(info.timestamp)} ${info.level}: ${String(info.message)}`,
   )
 );
 

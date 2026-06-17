@@ -1,15 +1,15 @@
-import { Request, Response, NextFunction } from 'express';
-import { ZodError } from 'zod';
+import { type Request, type Response, type NextFunction } from "express";
+import { ZodError } from "zod";
 
-import { config } from '../../config/env';
-import { logger } from '../utils/logger';
-import { AppError } from '../types/error';
+import { config } from "../../config/env";
+import { AppError } from "../types/error";
+import { logger } from "../utils/logger";
 
 export const errorHandler = (
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction,
 ): void => {
   // Log error
   logger.error(`Error: ${err.message}`, {
@@ -22,9 +22,9 @@ export const errorHandler = (
   if (err instanceof ZodError) {
     res.status(422).json({
       success: false,
-      message: 'Validation failed',
+      message: "Validation failed",
       errors: err.errors.map((e) => ({
-        field: e.path.join('.'),
+        field: e.path.join("."),
         message: e.message,
       })),
     });
@@ -36,24 +36,24 @@ export const errorHandler = (
     res.status(err.statusCode).json({
       success: false,
       message: err.message,
-      ...(config.env === 'development' && { stack: err.stack }),
+      // ...(config.env === 'development' && { stack: err.stack }),
     });
     return;
   }
 
   // JWT errors
-  if (err.name === 'JsonWebTokenError') {
+  if (err.name === "JsonWebTokenError") {
     res.status(401).json({
       success: false,
-      message: 'Invalid token',
+      message: "Invalid token",
     });
     return;
   }
 
-  if (err.name === 'TokenExpiredError') {
+  if (err.name === "TokenExpiredError") {
     res.status(401).json({
       success: false,
-      message: 'Token expired',
+      message: "Token expired",
     });
     return;
   }
@@ -61,8 +61,8 @@ export const errorHandler = (
   // Default to 500 server error
   res.status(500).json({
     success: false,
-    message: config.env === 'production' ? 'Something went wrong' : err.message,
-    ...(config.env === 'development' && { stack: err.stack }),
+    message: config.env === "production" ? "Something went wrong" : err.message,
+    ...(config.env === "development" && { stack: err.stack }),
   });
 };
 
