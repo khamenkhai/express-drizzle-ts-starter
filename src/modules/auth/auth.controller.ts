@@ -8,6 +8,10 @@ import {
   type RegisterInput,
   type LoginInput,
   type RefreshTokenInput,
+  type VerifyEmailInput,
+  type ForgotPasswordInput,
+  type ResetPasswordInput,
+  type ChangePasswordInput,
 } from "./auth.validation";
 
 export class AuthController {
@@ -16,11 +20,27 @@ export class AuthController {
       const data = req.body as RegisterInput;
       const result = await authService.register(data);
 
-      logger.info(`User registered: ${result.user.email}`);
+      logger.info(`Registration initiated for: ${data.email}`);
 
       res.status(201).json({
         success: true,
-        message: "User registered successfully",
+        message: result.message,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async verifyEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = req.body as VerifyEmailInput;
+      const result = await authService.verifyEmail(data);
+
+      logger.info(`Email verified for: ${data.email}`);
+
+      res.status(201).json({
+        success: true,
+        message: "Email verified successfully",
         data: result,
       });
     } catch (error) {
@@ -77,11 +97,59 @@ export class AuthController {
     }
   }
 
-  logout(req: AuthRequest, res: Response) {
+  logout(_req: AuthRequest, res: Response) {
     res.status(200).json({
       success: true,
       message: "Logout successful",
     });
+  }
+
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = req.body as ForgotPasswordInput;
+      const result = await authService.forgotPassword(data);
+
+      res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = req.body as ResetPasswordInput;
+      const result = await authService.resetPassword(data);
+
+      res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async changePassword(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new Error("User not authenticated");
+      }
+
+      const data = req.body as ChangePasswordInput;
+      const result = await authService.changePassword(req.user.id, data);
+
+      logger.info(`Password changed for user: ${req.user.email}`);
+
+      res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 }
 

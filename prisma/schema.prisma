@@ -1,7 +1,7 @@
 generator client {
   provider     = "prisma-client"
   moduleFormat = "cjs"
-  output       = "../src/db/generated/client"
+  output       = "../src/generated/client"
 }
 
 datasource db {
@@ -9,13 +9,16 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  name     String  @db.VarChar(255)
-  password String  @db.VarChar(255)
-  age      Int
-  email    String  @unique @db.VarChar(255)
-  role     Role?   @relation(fields: [roleId], references: [id])
-  roleId   String? @map("role_id")
+  id            Int     @id @default(autoincrement())
+  name          String  @db.VarChar(255)
+  password      String  @db.VarChar(255)
+  age           Int
+  email         String  @unique @db.VarChar(255)
+  emailVerified Boolean @default(false) @map("email_verified")
+  role          Role?   @relation(fields: [roleId], references: [id])
+  roleId        String? @map("role_id")
+
+  passwordResets PasswordResetToken[]
 
   @@index([roleId])
   @@map("users_table")
@@ -59,4 +62,32 @@ model Post {
 
   @@index([createdAt])
   @@map("posts_table")
+}
+
+model VerificationToken {
+  id        String   @id @default(uuid())
+  email     String   @db.VarChar(255)
+  code      String   @db.VarChar(10)
+  password  String   @db.VarChar(255)
+  name      String   @db.VarChar(255)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([email, code])
+  @@index([email])
+  @@map("verification_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    Int       @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("password_reset_tokens")
 }

@@ -39,4 +39,6 @@ temp/
 tmp/
 
 drizzle/
-/src/generated/prisma
+/src/generated/
+src/db/generated/*
+generated

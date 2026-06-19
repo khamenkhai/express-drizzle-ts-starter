@@ -21,6 +21,14 @@ const envSchema = z.object({
   RATE_LIMIT_MAX_REQUESTS: z.string().transform(Number).default('100'),
   
   BCRYPT_ROUNDS: z.string().transform(Number).default('10'),
+
+  MAIL_HOST: z.string().default('smtp.gmail.com'),
+  MAIL_PORT: z.string().transform(Number).default('587'),
+  MAIL_USER: z.string().default(''),
+  MAIL_PASS: z.string().default(''),
+  MAIL_FROM: z.string().default('noreply@example.com'),
+
+  FRONTEND_URL: z.string().default('http://localhost:3000'),
 });
 
 const parseEnv = () => {
@@ -68,4 +76,14 @@ export const config = {
   bcrypt: {
     rounds: env.BCRYPT_ROUNDS,
   },
+
+  mail: {
+    host: env.MAIL_HOST,
+    port: env.MAIL_PORT,
+    user: env.MAIL_USER,
+    pass: env.MAIL_PASS,
+    from: env.MAIL_FROM,
+  },
+
+  frontendUrl: env.FRONTEND_URL,
 };
