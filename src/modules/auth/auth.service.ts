@@ -46,6 +46,41 @@ const hashToken = (token: string): string => {
   return crypto.createHash("sha256").update(token).digest("hex");
 };
 
+const parseExpiresIn = (value: string): number => {
+  const match = /^(\d+)([smhd])$/.exec(value);
+  if (!match) return 15 * 60 * 1000;
+  const num = parseInt(match[1], 10);
+  const unit = match[2];
+  switch (unit) {
+    case "s":
+      return num * 1000;
+    case "m":
+      return num * 60 * 1000;
+    case "h":
+      return num * 60 * 60 * 1000;
+    case "d":
+      return num * 24 * 60 * 60 * 1000;
+    default:
+      return 15 * 60 * 1000;
+  }
+};
+
+const storeRefreshToken = async (
+  token: string,
+  userId: number,
+): Promise<void> => {
+  const expiresAt = new Date(
+    Date.now() + parseExpiresIn(config.jwt.refreshExpiresIn),
+  );
+  await prisma.refreshToken.create({
+    data: {
+      token,
+      userId,
+      expiresAt,
+    },
+  });
+};
+
 export class AuthService {
   async register(data: RegisterInput) {
     const existingUser = await userService.getUserByEmail(data.email);
@@ -138,6 +173,8 @@ export class AuthService {
       permissions,
     });
 
+    await storeRefreshToken(tokens.refreshToken, user.id);
+
     const { password: _password, ...userWithoutPassword } = user;
 
     logger.info(`Email verified and user created: ${data.email}`);
@@ -169,6 +206,8 @@ export class AuthService {
       permissions,
     });
 
+    await storeRefreshToken(tokens.refreshToken, user.id);
+
     const { password: _password, ...userWithoutPassword } = user;
 
     return { user: userWithoutPassword, tokens };
@@ -177,18 +216,59 @@ export class AuthService {
   async refreshToken(refreshToken: string): Promise<TokenPair> {
     const payload = verifyRefreshToken(refreshToken);
 
+    const storedToken = await prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+    });
+
+    if (!storedToken) {
+      throw new UnauthorizedError("Refresh token not found");
+    }
+
+    if (storedToken.revokedAt) {
+      throw new UnauthorizedError("Refresh token has been revoked");
+    }
+
+    if (new Date() > storedToken.expiresAt) {
+      throw new UnauthorizedError("Refresh token has expired");
+    }
+
+    await prisma.refreshToken.update({
+      where: { id: storedToken.id },
+      data: { revokedAt: new Date() },
+    });
+
     const permissions = await userService.getUserPermissions(payload.id);
 
-    return generateTokenPair({
+    const tokens = generateTokenPair({
       id: payload.id,
       email: payload.email,
       role: payload.role,
       permissions,
     });
+
+    await storeRefreshToken(tokens.refreshToken, payload.id);
+
+    return tokens;
   }
 
   async getProfile(userId: number) {
     return await userService.getUserById(userId);
+  }
+
+  async logout(userId: number, refreshToken?: string) {
+    if (refreshToken) {
+      await prisma.refreshToken.updateMany({
+        where: { token: refreshToken, userId },
+        data: { revokedAt: new Date() },
+      });
+    } else {
+      await prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+    }
+
+    return { message: "Logout successful" };
   }
 
   async forgotPassword(data: ForgotPasswordInput) {
@@ -224,7 +304,10 @@ export class AuthService {
 
     logger.info(`Password reset email sent to ${data.email}`);
 
-    return { message: "If the email exists, a reset link has been sent" };
+    return {
+      message: "If the email exists, a reset link has been sent",
+      resetToken: rawToken,
+    };
   }
 
   async resetPassword(data: ResetPasswordInput) {
@@ -261,6 +344,10 @@ export class AuthService {
         where: { id: resetToken.id },
         data: { usedAt: new Date() },
       }),
+      prisma.refreshToken.updateMany({
+        where: { userId: resetToken.userId },
+        data: { revokedAt: new Date() },
+      }),
     ]);
 
     logger.info(`Password reset for user: ${resetToken.user.email}`);
@@ -284,10 +371,16 @@ export class AuthService {
 
     const hashedPassword = await hashPassword(data.newPassword);
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: { password: hashedPassword },
-    });
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+      }),
+      prisma.refreshToken.updateMany({
+        where: { userId },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
 
     logger.info(`Password changed for user: ${user.email}`);
 

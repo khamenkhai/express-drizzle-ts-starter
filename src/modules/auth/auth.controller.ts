@@ -98,11 +98,22 @@ export class AuthController {
     }
   }
 
-  logout(_req: AuthRequest, res: Response) {
-    res.status(200).json({
-      status: true,
-      message: "Logout successful",
-    });
+  async logout(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new Error("User not authenticated");
+      }
+
+      const { refreshToken } = req.body as { refreshToken?: string };
+      const result = await authService.logout(req.user.id, refreshToken);
+
+      res.status(200).json({
+        status: true,
+        message: result.message,
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 
   async forgotPassword(req: Request, res: Response, next: NextFunction) {
@@ -113,6 +124,7 @@ export class AuthController {
       res.status(200).json({
         status: true,
         message: result.message,
+        data: { resetToken: result.resetToken },
       });
     } catch (error) {
       next(error);

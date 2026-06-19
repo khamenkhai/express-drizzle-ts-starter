@@ -19,6 +19,7 @@ model User {
   roleId        String? @map("role_id")
 
   passwordResets PasswordResetToken[]
+  refreshTokens  RefreshToken[]
 
   @@index([roleId])
   @@map("users_table")
@@ -90,6 +91,20 @@ model PasswordResetToken {
   @@index([userId])
   @@index([token])
   @@map("password_reset_tokens")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    Int       @map("user_id")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
 }
 
 model Product {
