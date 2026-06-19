@@ -12,7 +12,7 @@ export class PermissionController {
   async getAll(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const permissions = await permissionService.getAll();
-      res.status(200).json({ success: true, data: permissions });
+      res.status(200).json({ status: true, message: "Permissions retrieved successfully", data: permissions });
     } catch (error) {
       next(error);
     }
@@ -22,7 +22,7 @@ export class PermissionController {
     try {
       const { id } = req.params;
       const permission = await permissionService.getById(id);
-      res.status(200).json({ success: true, data: permission });
+      res.status(200).json({ status: true, message: "Permission retrieved successfully", data: permission });
     } catch (error) {
       next(error);
     }
@@ -33,7 +33,7 @@ export class PermissionController {
       const data = req.body as CreatePermissionInput;
       const permission = await permissionService.create(data);
       res.status(201).json({
-        success: true,
+        status: true,
         message: "Permission created successfully",
         data: permission,
       });
@@ -48,7 +48,7 @@ export class PermissionController {
       const data = req.body as UpdatePermissionInput;
       const permission = await permissionService.update(id, data);
       res.status(200).json({
-        success: true,
+        status: true,
         message: "Permission updated successfully",
         data: permission,
       });
@@ -62,7 +62,7 @@ export class PermissionController {
       const { id } = req.params;
       await permissionService.delete(id);
       res.status(200).json({
-        success: true,
+        status: true,
         message: "Permission deleted successfully",
       });
     } catch (error) {

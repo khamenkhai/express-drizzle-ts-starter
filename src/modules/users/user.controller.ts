@@ -12,7 +12,8 @@ export class UserController {
       const users = await userService.getAllUsers();
 
       res.status(200).json({
-        success: true,
+        status: true,
+        message: "Users retrieved successfully",
         data: users,
       });
     } catch (error) {
@@ -27,14 +28,15 @@ export class UserController {
       const userId = Number(id);
 
       if (isNaN(userId)) {
-        res.status(400).json({ message: "Invalid User ID format" });
+        res.status(400).json({ status: false, message: "Invalid User ID format" });
         return;
       }
 
       const user = await userService.getUserById(userId);
 
       res.status(200).json({
-        success: true,
+        status: true,
+        message: "User retrieved successfully",
         data: user,
       });
     } catch (error) {
@@ -51,7 +53,7 @@ export class UserController {
       const userId = Number(req.user.id);
 
       if (isNaN(userId)) {
-        res.status(400).json({ message: "Invalid User ID format" });
+        res.status(400).json({ status: false, message: "Invalid User ID format" });
         return;
       }
 
@@ -64,7 +66,7 @@ export class UserController {
       logger.info(`User updated: ${user.email}`);
 
       res.status(200).json({
-        success: true,
+        status: true,
         message: "User updated successfully",
         data: user,
       });
@@ -88,7 +90,7 @@ export class UserController {
       logger.info(`User role updated: ${user.email} -> ${roleId}`);
 
       res.status(200).json({
-        success: true,
+        status: true,
         message: "User role updated successfully",
         data: user,
       });
@@ -109,7 +111,7 @@ export class UserController {
       logger.info(`User deleted: ${id}`);
 
       res.status(200).json({
-        success: true,
+        status: true,
         message: "User deleted successfully",
       });
     } catch (error) {

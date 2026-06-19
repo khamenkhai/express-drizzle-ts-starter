@@ -1,5 +1,4 @@
 import { type Response, type NextFunction } from "express";
-
 import { type AuthRequest } from "../types";
 import { ForbiddenError, UnauthorizedError } from "../types/error";
 

@@ -58,16 +58,18 @@ export const createApp = (): Application => {
   // Root route
   app.get("/", (req, res) => {
     res.json({
-      success: true,
+      status: true,
       message: "Express TypeScript Starter API",
-      version: config.apiVersion,
-      endpoints: {
-        health: `/api/${config.apiVersion}/health`,
-        auth: `/api/${config.apiVersion}/auth`,
-        users: `/api/${config.apiVersion}/users`,
-        roles: `/api/${config.apiVersion}/roles`,
-        permissions: `/api/${config.apiVersion}/permissions`,
-        posts: `/api/${config.apiVersion}/posts`,
+      data: {
+        version: config.apiVersion,
+        endpoints: {
+          health: `/api/${config.apiVersion}/health`,
+          auth: `/api/${config.apiVersion}/auth`,
+          users: `/api/${config.apiVersion}/users`,
+          roles: `/api/${config.apiVersion}/roles`,
+          permissions: `/api/${config.apiVersion}/permissions`,
+          posts: `/api/${config.apiVersion}/posts`,
+        },
       },
     });
   });

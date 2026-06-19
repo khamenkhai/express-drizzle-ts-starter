@@ -18,7 +18,7 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:4000",
+			"value": "http://localhost:5002",
 			"type": "string"
 		},
 		{
@@ -53,6 +53,16 @@
 		},
 		{
 			"key": "postId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "verificationCode",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "resetToken",
 			"value": "",
 			"type": "string"
 		}
@@ -95,24 +105,14 @@
 			"name": "Authentication",
 			"item": [
 				{
-					"name": "Register",
+					"name": "1. Register (Initiate)",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const jsonData = pm.response.json();",
-									"    if (jsonData.data && jsonData.data.accessToken) {",
-									"        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
-									"    }",
-									"    if (jsonData.data && jsonData.data.refreshToken) {",
-									"        pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
-									"    }",
-									"    if (jsonData.data && jsonData.data.user && jsonData.data.user.id) {",
-									"        pm.collectionVariables.set('userId', jsonData.data.user.id);",
-									"    }",
-									"}"
+									"// Register now sends a verification code, not tokens.",
+									"// Check the email for the 6-digit code and use Verify Email next."
 								],
 								"type": "text/javascript"
 							}
@@ -138,7 +138,57 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "{{apiVersion}}", "auth", "register"]
 						},
-						"description": "Register a new user. Password must be at least 8 characters with uppercase, lowercase, and number."
+						"description": "Step 1: Initiate registration. Sends a 6-digit verification code to the provided email. The code expires in 15 minutes."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Verify Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.tokens) {",
+									"        if (jsonData.data.tokens.accessToken) {",
+									"            pm.collectionVariables.set('accessToken', jsonData.data.tokens.accessToken);",
+									"        }",
+									"        if (jsonData.data.tokens.refreshToken) {",
+									"            pm.collectionVariables.set('refreshToken', jsonData.data.tokens.refreshToken);",
+									"        }",
+									"    }",
+									"    if (jsonData.data && jsonData.data.user && jsonData.data.user.id) {",
+									"        pm.collectionVariables.set('userId', jsonData.data.user.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"code\": \"{{verificationCode}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/auth/verify-email",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "auth", "verify-email"]
+						},
+						"description": "Step 2: Verify email with the 6-digit code sent to your email. On success, creates the user and returns access/refresh tokens. Set the 'verificationCode' variable before running."
 					},
 					"response": []
 				},
@@ -151,11 +201,13 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    const jsonData = pm.response.json();",
-									"    if (jsonData.data && jsonData.data.accessToken) {",
-									"        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
-									"    }",
-									"    if (jsonData.data && jsonData.data.refreshToken) {",
-									"        pm.collectionVariables.set('refreshToken', jsonData.data.refreshToken);",
+									"    if (jsonData.data && jsonData.data.tokens) {",
+									"        if (jsonData.data.tokens.accessToken) {",
+									"            pm.collectionVariables.set('accessToken', jsonData.data.tokens.accessToken);",
+									"        }",
+									"        if (jsonData.data.tokens.refreshToken) {",
+									"            pm.collectionVariables.set('refreshToken', jsonData.data.tokens.refreshToken);",
+									"        }",
 									"    }",
 									"    if (jsonData.data && jsonData.data.user && jsonData.data.user.id) {",
 									"        pm.collectionVariables.set('userId', jsonData.data.user.id);",
@@ -186,7 +238,7 @@
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "{{apiVersion}}", "auth", "login"]
 						},
-						"description": "Login with email and password to get access and refresh tokens"
+						"description": "Login with email and password. Email must be verified first. Returns access and refresh tokens."
 					},
 					"response": []
 				},
@@ -257,6 +309,81 @@
 							"path": ["api", "{{apiVersion}}", "auth", "logout"]
 						},
 						"description": "Logout current user"
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/auth/forgot-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "auth", "forgot-password"]
+						},
+						"description": "Send a password reset email. If the email exists, a reset link with a token (15-minute expiry) will be sent. Check the email for the reset token."
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"newPassword\": \"NewPassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/auth/reset-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "auth", "reset-password"]
+						},
+						"description": "Reset password using the token from the forgot-password email. Set the 'resetToken' variable with the token from the email. Token expires in 15 minutes and can only be used once."
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"oldPassword\": \"Password123\",\n  \"newPassword\": \"NewPassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/{{apiVersion}}/auth/change-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "{{apiVersion}}", "auth", "change-password"]
+						},
+						"description": "Change password for authenticated user. Requires valid old password. Must be logged in (token auto-attached via collection auth)."
 					},
 					"response": []
 				}

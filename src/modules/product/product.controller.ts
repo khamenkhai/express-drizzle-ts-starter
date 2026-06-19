@@ -3,20 +3,20 @@ import { type Response, type NextFunction } from "express";
 import { type AuthRequest } from "../../shared/types";
 import { logger } from "../../shared/utils/logger";
 
-import { postService } from "./post.service";
-import { type CreatePostInput, type UpdatePostInput } from "./post.validation";
+import { productService } from "./product.service";
+import { type CreateProductInput, type UpdateProductInput } from "./product.validation";
 
-export class PostController {
+export class ProductController {
   async getAll(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
 
-      const result = await postService.getAll({ page, limit });
+      const result = await productService.getAll({ page, limit });
 
       res.status(200).json({
         status: true,
-        message: "Posts retrieved successfully",
+        message: "Products retrieved successfully",
         data: result,
       });
     } catch (error) {
@@ -27,8 +27,8 @@ export class PostController {
   async getById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const post = await postService.getById(Number(id));
-      res.status(200).json({ status: true, message: "Post retrieved successfully", data: post });
+      const product = await productService.getById(Number(id));
+      res.status(200).json({ status: true, message: "Product retrieved successfully", data: product });
     } catch (error) {
       next(error);
     }
@@ -36,13 +36,13 @@ export class PostController {
 
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const data = req.body as CreatePostInput;
-      const post = await postService.create(data);
-      logger.info(`Post created: ${post.title}`);
+      const data = req.body as CreateProductInput;
+      const product = await productService.create(data);
+      logger.info("Product created: " + product.name);
       res.status(201).json({
         status: true,
-        message: "Post created successfully",
-        data: post,
+        message: "Product created successfully",
+        data: product,
       });
     } catch (error) {
       next(error);
@@ -52,13 +52,13 @@ export class PostController {
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const data = req.body as UpdatePostInput;
-      const post = await postService.update(Number(id), data);
-      logger.info(`Post updated: ${post.title}`);
+      const data = req.body as UpdateProductInput;
+      const product = await productService.update(Number(id), data);
+      logger.info("Product updated: " + product.name);
       res.status(200).json({
         status: true,
-        message: "Post updated successfully",
-        data: post,
+        message: "Product updated successfully",
+        data: product,
       });
     } catch (error) {
       next(error);
@@ -68,11 +68,11 @@ export class PostController {
   async delete(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      await postService.delete(Number(id));
-      logger.info(`Post deleted: ${id}`);
+      await productService.delete(Number(id));
+      logger.info("Product deleted: " + id);
       res.status(200).json({
         status: true,
-        message: "Post deleted successfully",
+        message: "Product deleted successfully",
       });
     } catch (error) {
       next(error);
@@ -80,4 +80,4 @@ export class PostController {
   }
 }
 
-export const postController = new PostController();
+export const productController = new ProductController();

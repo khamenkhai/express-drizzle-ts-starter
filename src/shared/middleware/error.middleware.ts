@@ -21,9 +21,9 @@ export const errorHandler = (
   // Zod validation error
   if (err instanceof ZodError) {
     res.status(422).json({
-      success: false,
+      status: false,
       message: "Validation failed",
-      errors: err.errors.map((e) => ({
+      data: err.errors.map((e) => ({
         field: e.path.join("."),
         message: e.message,
       })),
@@ -34,9 +34,8 @@ export const errorHandler = (
   // Custom AppError
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
-      success: false,
+      status: false,
       message: err.message,
-      // ...(config.env === 'development' && { stack: err.stack }),
     });
     return;
   }
@@ -44,7 +43,7 @@ export const errorHandler = (
   // JWT errors
   if (err.name === "JsonWebTokenError") {
     res.status(401).json({
-      success: false,
+      status: false,
       message: "Invalid token",
     });
     return;
@@ -52,7 +51,7 @@ export const errorHandler = (
 
   if (err.name === "TokenExpiredError") {
     res.status(401).json({
-      success: false,
+      status: false,
       message: "Token expired",
     });
     return;
@@ -60,7 +59,7 @@ export const errorHandler = (
 
   // Default to 500 server error
   res.status(500).json({
-    success: false,
+    status: false,
     message: config.env === "production" ? "Something went wrong" : err.message,
     ...(config.env === "development" && { stack: err.stack }),
   });
@@ -68,7 +67,7 @@ export const errorHandler = (
 
 export const notFoundHandler = (req: Request, res: Response): void => {
   res.status(404).json({
-    success: false,
+    status: false,
     message: `Route ${req.originalUrl} not found`,
   });
 };

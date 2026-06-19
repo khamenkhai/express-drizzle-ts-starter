@@ -41,4 +41,3 @@ tmp/
 drizzle/
 /src/generated/
 src/db/generated/*
-generated

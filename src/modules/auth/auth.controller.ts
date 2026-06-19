@@ -23,7 +23,7 @@ export class AuthController {
       logger.info(`Registration initiated for: ${data.email}`);
 
       res.status(201).json({
-        success: true,
+        status: true,
         message: result.message,
       });
     } catch (error) {
@@ -39,7 +39,7 @@ export class AuthController {
       logger.info(`Email verified for: ${data.email}`);
 
       res.status(201).json({
-        success: true,
+        status: true,
         message: "Email verified successfully",
         data: result,
       });
@@ -56,7 +56,7 @@ export class AuthController {
       logger.info(`User logged in: ${result.user.email}`);
 
       res.status(200).json({
-        success: true,
+        status: true,
         message: "Login successful",
         data: result,
       });
@@ -71,7 +71,7 @@ export class AuthController {
       const tokens = await authService.refreshToken(refreshToken);
 
       res.status(200).json({
-        success: true,
+        status: true,
         message: "Token refreshed successfully",
         data: tokens,
       });
@@ -89,7 +89,8 @@ export class AuthController {
       const user = await authService.getProfile(req.user.id);
 
       res.status(200).json({
-        success: true,
+        status: true,
+        message: "Profile retrieved successfully",
         data: user,
       });
     } catch (error) {
@@ -99,7 +100,7 @@ export class AuthController {
 
   logout(_req: AuthRequest, res: Response) {
     res.status(200).json({
-      success: true,
+      status: true,
       message: "Logout successful",
     });
   }
@@ -110,7 +111,7 @@ export class AuthController {
       const result = await authService.forgotPassword(data);
 
       res.status(200).json({
-        success: true,
+        status: true,
         message: result.message,
       });
     } catch (error) {
@@ -124,7 +125,7 @@ export class AuthController {
       const result = await authService.resetPassword(data);
 
       res.status(200).json({
-        success: true,
+        status: true,
         message: result.message,
       });
     } catch (error) {
@@ -144,7 +145,7 @@ export class AuthController {
       logger.info(`Password changed for user: ${req.user.email}`);
 
       res.status(200).json({
-        success: true,
+        status: true,
         message: result.message,
       });
     } catch (error) {

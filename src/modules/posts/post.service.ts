@@ -1,5 +1,5 @@
 import { prisma } from "../../db";
-import { type Post } from "../../db/generated/client/client";
+import { type Post } from "../../generated/client/client";
 import { type PaginatedResponse } from "../../shared/types";
 import { NotFoundError } from "../../shared/types/error";
 

@@ -14,7 +14,8 @@
     "db:generate": "prisma generate",
     "seed": "tsx src/db/seed/seed.ts",
     "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix"
+    "lint:fix": "eslint src/ --fix",
+    "generate": "tsx src/scripts/generate.ts"
   },
   "author": "",
   "license": "ISC",
