@@ -1,23 +1,32 @@
 import { prisma } from "../../db";
-import { type Post } from "../../generated/client/client";
-import { type PaginatedResponse } from "../../shared/types";
+import { type Post, type Prisma } from "../../generated/client/client";
+import { type PaginationParams, type PaginatedResponse } from "../../shared/types";
 import { NotFoundError } from "../../shared/types/error";
 
 export class PostService {
-  async getAll(params: {
-    page: number;
-    limit: number;
-  }): Promise<PaginatedResponse<unknown>> {
-    const { page, limit } = params;
+  async getAll(params: PaginationParams): Promise<PaginatedResponse<Post>> {
+    const { page, limit, search, sortBy = "createdAt", sortOrder = "desc" } = params;
     const skip = (page - 1) * limit;
+
+    const where: Prisma.PostWhereInput = search
+      ? {
+          OR: [
+            { title: { contains: search, mode: "insensitive" } },
+            { content: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {};
+
+    const orderBy: Prisma.PostOrderByWithRelationInput = { [sortBy]: sortOrder };
 
     const [data, total] = await Promise.all([
       prisma.post.findMany({
+        where,
         skip,
         take: limit,
-        orderBy: { createdAt: "desc" },
+        orderBy,
       }),
-      prisma.post.count(),
+      prisma.post.count({ where }),
     ]);
 
     return {

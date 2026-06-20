@@ -1,5 +1,5 @@
 {
-  "name": "golden_thailand_api",
+  "name": "express-drizzle-ts-starter",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -26,6 +26,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
     "@types/node": "^24.0.10",
     "@types/nodemailer": "^8.0.1",
     "eslint": "^10.5.0",
@@ -40,6 +41,8 @@
     "typescript-eslint": "^8.61.1"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1072.0",
+    "@aws-sdk/s3-request-presigner": "^3.1072.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "bcrypt": "^6.0.0",
@@ -50,6 +53,7 @@
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.2.0",
     "nodemailer": "^9.0.1",
     "nodemon": "^3.1.10",
     "winston": "^3.19.0",

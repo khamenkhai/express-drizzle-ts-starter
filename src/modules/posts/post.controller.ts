@@ -4,15 +4,24 @@ import { type AuthRequest } from "../../shared/types";
 import { logger } from "../../shared/utils/logger";
 
 import { postService } from "./post.service";
-import { type CreatePostInput, type UpdatePostInput } from "./post.validation";
+import {
+  type CreatePostInput,
+  type UpdatePostInput,
+  type PostQueryInput,
+} from "./post.validation";
 
 export class PostController {
   async getAll(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const page = Number(req.query.page) || 1;
-      const limit = Number(req.query.limit) || 10;
+      const query = req.query as unknown as PostQueryInput;
 
-      const result = await postService.getAll({ page, limit });
+      const result = await postService.getAll({
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+        sortBy: query.sortBy,
+        sortOrder: query.sortOrder,
+      });
 
       res.status(200).json({
         status: true,
@@ -28,7 +37,11 @@ export class PostController {
     try {
       const { id } = req.params;
       const post = await postService.getById(Number(id));
-      res.status(200).json({ status: true, message: "Post retrieved successfully", data: post });
+      res.status(200).json({
+        status: true,
+        message: "Post retrieved successfully",
+        data: post,
+      });
     } catch (error) {
       next(error);
     }

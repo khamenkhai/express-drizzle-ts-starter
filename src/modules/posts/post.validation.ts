@@ -1,9 +1,14 @@
 import { z } from "zod";
 
+import { type PaginationParams } from "../../shared/types";
+
 export const getAllPostsSchema = z.object({
   query: z.object({
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(100).default(10),
+    search: z.string().optional(),
+    sortBy: z.enum(["id", "title", "createdAt"]).default("createdAt"),
+    sortOrder: z.enum(["asc", "desc"]).default("desc"),
   }),
 });
 
@@ -34,5 +39,6 @@ export const getPostByIdSchema = z.object({
   }),
 });
 
+export type PostQueryInput = PaginationParams;
 export type CreatePostInput = z.infer<typeof createPostSchema>["body"];
 export type UpdatePostInput = z.infer<typeof updatePostSchema>["body"];

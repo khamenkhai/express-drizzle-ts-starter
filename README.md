@@ -63,6 +63,14 @@ MAIL_PASS=your-app-password
 MAIL_FROM=your-email@gmail.com
 
 FRONTEND_URL=http://localhost:3000
+
+# S3 / MinIO Configuration
+S3_ENDPOINT=http://localhost:9000
+S3_BUCKET=uploads
+S3_REGION=us-east-1
+S3_ACCESS_KEY=minioadmin
+S3_SECRET_KEY=minioadmin
+S3_FORCE_PATH_STYLE=true
 ```
 
 ### Gmail Setup (for Nodemailer)
@@ -74,6 +82,9 @@ FRONTEND_URL=http://localhost:3000
 ## Running the Application
 
 ```bash
+# Start PostgreSQL + MinIO (Docker)
+docker compose up -d
+
 # Development
 npm run dev
 
@@ -118,7 +129,8 @@ src/
 │   ├── users/                    # Users module
 │   ├── roles/                    # Roles module (RBAC)
 │   ├── permissions/              # Permissions module (RBAC)
-│   └── posts/                    # Posts module (example)
+│   ├── posts/                    # Posts module (example)
+│   └── uploads/                  # File upload module
 ├── scripts/
 │   └── generate.ts               # CRUD module generator
 ├── shared/
@@ -126,11 +138,13 @@ src/
 │   │   ├── auth.middleware.ts     # JWT authentication
 │   │   ├── permissions.middleware.ts  # RBAC permission check
 │   │   ├── validate.middleware.ts # Zod validation
+│   │   ├── upload.middleware.ts   # Multer file upload
 │   │   ├── error.middleware.ts    # Centralized error handler
 │   │   └── logger.middleware.ts   # Request logger
 │   ├── services/
 │   │   ├── mailer.ts             # Nodemailer transporter
-│   │   └── emailTemplates.ts     # HTML email templates
+│   │   ├── emailTemplates.ts     # HTML email templates
+│   │   └── upload.ts             # S3/MinIO file upload service
 │   ├── types/
 │   │   ├── index.ts              # Shared types (ApiResponse, AuthRequest, etc.)
 │   │   └── error.ts              # Custom error classes
@@ -226,6 +240,15 @@ PATCH  /api/v1/posts/:id            # Update post
 DELETE /api/v1/posts/:id            # Delete post
 ```
 
+### File Upload (S3/MinIO)
+
+```
+POST   /api/v1/uploads/single       # Upload single file (Protected)
+POST   /api/v1/uploads/multiple     # Upload up to 10 files (Protected)
+DELETE /api/v1/uploads/:key         # Delete file by key (Protected)
+GET    /api/v1/uploads/signed-url   # Get signed download URL (Protected)
+```
+
 ## Usage Examples
 
 ### Two-Step Registration
@@ -297,6 +320,31 @@ curl -X GET http://localhost:5002/api/v1/auth/profile \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
+### File Upload
+
+```bash
+# Upload single file
+curl -X POST http://localhost:5002/api/v1/uploads/single \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -F "file=@./photo.jpg" \
+  -F "folder=avatars"
+
+# Upload multiple files
+curl -X POST http://localhost:5002/api/v1/uploads/multiple \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -F "files=@./photo1.jpg" \
+  -F "files=@./photo2.png" \
+  -F "folder=documents"
+
+# Delete file
+curl -X DELETE http://localhost:5002/api/v1/uploads/avatars/1234567890-abc123.jpg \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Get signed download URL (for private files)
+curl -X GET "http://localhost:5002/api/v1/uploads/signed-url?key=avatars/1234567890-abc123.jpg" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
 ## Password Rules
 
 - Minimum 8 characters
@@ -314,6 +362,59 @@ curl -X GET http://localhost:5002/api/v1/auth/profile \
 6. **Input Validation** - Zod schemas on all endpoints
 7. **Email Verification** - 6-digit code with 15-minute expiry
 8. **Reset Token** - SHA-256 hashed, single-use, 15-minute expiry
+9. **File Upload** - S3-compatible with MinIO, 10MB limit, type validation
+
+## File Upload Service
+
+Built on AWS SDK v3 with S3-compatible API. Uses **MinIO** in development (runs in Docker).
+
+### MinIO Console
+
+Access at http://localhost:9001 after starting Docker:
+- Username: `minioadmin`
+- Password: `minioadmin`
+
+### Usage in Code
+
+```typescript
+import { uploadService } from "../shared/services/upload";
+
+// Upload a file
+const result = await uploadService.uploadFile(file, { folder: "avatars" });
+// Returns: { key, url, size, mimetype }
+
+// Delete a file
+await uploadService.deleteFile("avatars/1234567890-abc123.jpg");
+
+// Get a signed download URL (expires in 1 hour by default)
+const url = await uploadService.getSignedDownloadUrl("avatars/1234567890-abc123.jpg");
+
+// Get a signed upload URL (for client-side direct upload)
+const uploadUrl = await uploadService.getSignedUploadUrl("key.jpg", "image/jpeg");
+
+// Generate a key with optional folder
+const key = uploadService.generateKey("photo.jpg", "avatars");
+// Returns: "avatars/1718829600000-a1b2c3d4e5f6.jpg"
+```
+
+### Allowed File Types
+
+- Images: JPEG, PNG, GIF, WebP, SVG
+- Documents: PDF, DOC, DOCX, XLS, XLSX
+- Text: Plain text, CSV
+
+### Switching to AWS S3
+
+Update `.env` for production:
+
+```env
+S3_ENDPOINT=https://s3.us-east-1.amazonaws.com
+S3_BUCKET=your-production-bucket
+S3_REGION=us-east-1
+S3_ACCESS_KEY=your-aws-access-key
+S3_SECRET_KEY=your-aws-secret-key
+S3_FORCE_PATH_STYLE=false
+```
 
 ## Error Handling
 

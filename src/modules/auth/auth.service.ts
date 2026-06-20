@@ -109,6 +109,7 @@ export class AuthService {
     });
 
     const html = verificationEmailTemplate(code, data.name);
+
     await sendMail({
       to: data.email,
       subject: "Verify your email address",

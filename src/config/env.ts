@@ -29,6 +29,13 @@ const envSchema = z.object({
   MAIL_FROM: z.string().default('noreply@example.com'),
 
   FRONTEND_URL: z.string().default('http://localhost:3000'),
+
+  S3_ENDPOINT: z.string().default('http://localhost:9000'),
+  S3_BUCKET: z.string().default('uploads'),
+  S3_REGION: z.string().default('us-east-1'),
+  S3_ACCESS_KEY: z.string().default('minioadmin'),
+  S3_SECRET_KEY: z.string().default('minioadmin'),
+  S3_FORCE_PATH_STYLE: z.string().transform(Boolean).default('true'),
 });
 
 const parseEnv = () => {
@@ -86,4 +93,13 @@ export const config = {
   },
 
   frontendUrl: env.FRONTEND_URL,
+
+  s3: {
+    endpoint: env.S3_ENDPOINT,
+    bucket: env.S3_BUCKET,
+    region: env.S3_REGION,
+    accessKey: env.S3_ACCESS_KEY,
+    secretKey: env.S3_SECRET_KEY,
+    forcePathStyle: env.S3_FORCE_PATH_STYLE,
+  },
 };
