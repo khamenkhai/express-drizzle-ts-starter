@@ -15,34 +15,14 @@ const postRoutes = Router();
 
 postRoutes.use(authenticate);
 
-postRoutes.get(
-  "/",
-  validate(getAllPostsSchema),
-  postController.getAll,
-);
+postRoutes.get("/", validate(getAllPostsSchema), postController.getAll);
 
-postRoutes.get(
-  "/:id",
-  validate(getPostByIdSchema),
-  postController.getById,
-);
+postRoutes.get("/:id", validate(getPostByIdSchema), postController.getById);
 
-postRoutes.post(
-  "/",
-  validate(createPostSchema),
-  postController.create,
-);
+postRoutes.post("/", validate(createPostSchema), postController.create);
 
-postRoutes.patch(
-  "/:id",
-  validate(updatePostSchema),
-  postController.update,
-);
+postRoutes.patch("/:id", validate(updatePostSchema), postController.update);
 
-postRoutes.delete(
-  "/:id",
-  validate(getPostByIdSchema),
-  postController.delete,
-);
+postRoutes.delete("/:id", validate(getPostByIdSchema), postController.delete);
 
 export default postRoutes;
